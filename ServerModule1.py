@@ -1,10 +1,9 @@
-# server.py — ChainFlux backend logic
 import hashlib
 import json
 import time
 import os
 from uuid import uuid4
-from flask import Flask, jsonify, request, render_template_string
+import anvil.server
 
 CHAIN_FILE = 'chainflux.json'
 
@@ -92,49 +91,21 @@ class ChainFlux:
             data = json.load(f)
         return [Block(**b) for b in data]
 
-app = Flask(__name__)
 chain = ChainFlux()
 
-@app.route('/')
-def home():
-    html = """
-    <html><head><title>ChainFlux Explorer</title><style>
-    body { font-family: sans-serif; background: #f9f9f9; padding: 20px; }
-    .block { background: white; padding: 20px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 0 6px rgba(0,0,0,0.05); }
-    h2 { margin: 0; }
-    </style></head><body>
-    <h1>🧠 ChainFlux: Narrative Blockchain</h1>
-    {% for block in chain %}
-    <div class="block">
-        <h2>#{{ block.index }}: {{ block.title }}</h2>
-        <p><b>Time:</b> {{ block.timestamp }}</p>
-        <p><b>Links to:</b> {{ block.linked_blocks }}</p>
-        <p><b>Hash:</b> {{ block.hash }}</p>
-        <p><b>Prev:</b> {{ block.previous_hash }}</p>
-        <p>{{ block.narrative }}</p>
-    </div>
-    {% endfor %}
-    </body></html>
-    """
-    return render_template_string(html, chain=[block.__dict__ for block in chain.chain])
+@anvil.server.callable
+def get_chain():
+    return [block.__dict__ for block in chain.chain]
 
-@app.route('/add', methods=['POST'])
-def add_event():
-    data = request.get_json()
-    required = ['title', 'narrative', 'linked_blocks']
-    if not all(field in data for field in required):
-        return jsonify({'error': 'Missing fields'}), 400
-    chain.add_event(data['title'], data['narrative'], data['linked_blocks'])
-    return jsonify({'message': 'Event added to queue'})
+@anvil.server.callable
+def add_event(title, narrative, linked_blocks):
+    chain.add_event(title, narrative, linked_blocks)
+    return {"status": "event_added"}
 
-@app.route('/mine', methods=['GET'])
+@anvil.server.callable
 def mine_block():
     result = chain.mine()
-    return jsonify({'message': f'Block #{result} mined' if result is not False else 'No events to mine'})
+    if result is not False:
+        return {"status": "block_mined", "block_index": result}
+    return {"status": "no_events"}
 
-@app.route('/chain', methods=['GET'])
-def full_chain():
-    return jsonify([block.__dict__ for block in chain.chain])
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8050)
