@@ -1,10 +1,9 @@
-# ChainFlux – Narrative Blockchain of Inspired Events
-# Each block holds a title, narrative, and linked moments (references to prior blocks)
-
+# server.py — ChainFlux backend logic
 import hashlib
 import json
 import time
 import os
+from uuid import uuid4
 from flask import Flask, jsonify, request, render_template_string
 
 CHAIN_FILE = 'chainflux.json'
@@ -15,7 +14,7 @@ class Block:
         self.timestamp = timestamp
         self.title = title
         self.narrative = narrative
-        self.linked_blocks = linked_blocks  # list of block indices
+        self.linked_blocks = linked_blocks
         self.previous_hash = previous_hash
         self.nonce = nonce
         self.hash = self.compute_hash()
@@ -74,20 +73,13 @@ class ChainFlux:
     def mine(self):
         if not self.unconfirmed_events:
             return False
-
-        last = self.last_block()
         data = self.unconfirmed_events.pop(0)
-        new_block = Block(
-            index=len(self.chain),
-            timestamp=time.time(),
-            title=data['title'],
-            narrative=data['narrative'],
-            linked_blocks=data['linked_blocks'],
-            previous_hash=last.hash
-        )
-
+        last = self.last_block()
+        new_block = Block(len(self.chain), time.time(), data['title'], data['narrative'], data['linked_blocks'], last.hash)
         proof = self.proof_of_work(new_block)
-        return self.add_block(new_block, proof)
+        if self.add_block(new_block, proof):
+            return new_block.index
+        return False
 
     def save_chain(self):
         with open(CHAIN_FILE, 'w') as f:
@@ -99,8 +91,6 @@ class ChainFlux:
         with open(CHAIN_FILE, 'r') as f:
             data = json.load(f)
         return [Block(**b) for b in data]
-
-# ----------------- Flask App -----------------
 
 app = Flask(__name__)
 chain = ChainFlux()
@@ -129,7 +119,7 @@ def home():
     return render_template_string(html, chain=[block.__dict__ for block in chain.chain])
 
 @app.route('/add', methods=['POST'])
-def add():
+def add_event():
     data = request.get_json()
     required = ['title', 'narrative', 'linked_blocks']
     if not all(field in data for field in required):
@@ -137,14 +127,14 @@ def add():
     chain.add_event(data['title'], data['narrative'], data['linked_blocks'])
     return jsonify({'message': 'Event added to queue'})
 
-@app.route('/mine')
-def mine():
-    success = chain.mine()
-    return jsonify({'message': 'Block added' if success else 'No events to mine'})
+@app.route('/mine', methods=['GET'])
+def mine_block():
+    result = chain.mine()
+    return jsonify({'message': f'Block #{result} mined' if result is not False else 'No events to mine'})
 
-@app.route('/chain')
+@app.route('/chain', methods=['GET'])
 def full_chain():
     return jsonify([block.__dict__ for block in chain.chain])
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host='0.0.0.0', port=8050)
