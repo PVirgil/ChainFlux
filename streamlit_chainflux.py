@@ -1,9 +1,11 @@
+# streamlit_chainflux.py — ChainFlux narrative blockchain deployed on Streamlit
+
+import streamlit as st
 import hashlib
 import json
 import time
 import os
 from uuid import uuid4
-import anvil.server
 
 CHAIN_FILE = 'chainflux.json'
 
@@ -91,21 +93,43 @@ class ChainFlux:
             data = json.load(f)
         return [Block(**b) for b in data]
 
+# Initialize blockchain
 chain = ChainFlux()
 
-@anvil.server.callable
-def get_chain():
-    return [block.__dict__ for block in chain.chain]
+# Streamlit UI
+st.set_page_config(page_title="ChainFlux", layout="centered")
+st.title("🧠 ChainFlux – Narrative Blockchain")
 
-@anvil.server.callable
-def add_event(title, narrative, linked_blocks):
-    chain.add_event(title, narrative, linked_blocks)
-    return {"status": "event_added"}
+menu = ["View Chain", "Add Event", "Mine"]
+choice = st.sidebar.selectbox("Navigate", menu)
 
-@anvil.server.callable
-def mine_block():
-    result = chain.mine()
-    if result is not False:
-        return {"status": "block_mined", "block_index": result}
-    return {"status": "no_events"}
+if choice == "View Chain":
+    for block in reversed(chain.chain):
+        with st.expander(f"Block #{block.index}: {block.title}"):
+            st.write("**Time:**", time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(block.timestamp)))
+            st.write("**Narrative:**", block.narrative)
+            st.write("**Linked To:**", block.linked_blocks)
+            st.write("**Hash:**", block.hash)
+            st.write("**Previous Hash:**", block.previous_hash)
 
+elif choice == "Add Event":
+    st.subheader("Add a New Narrative Event")
+    title = st.text_input("Title")
+    narrative = st.text_area("Narrative")
+    linked_raw = st.text_input("Linked Block Indices (comma-separated)")
+    if st.button("Queue Event"):
+        try:
+            linked_blocks = [int(x.strip()) for x in linked_raw.split(',') if x.strip().isdigit()]
+            chain.add_event(title, narrative, linked_blocks)
+            st.success("Event added to the queue.")
+        except:
+            st.error("Invalid linked block input.")
+
+elif choice == "Mine":
+    st.subheader("Mine a Block")
+    if st.button("Mine Next Event"):
+        result = chain.mine()
+        if result is not False:
+            st.success(f"Block #{result} mined and added to chain!")
+        else:
+            st.warning("No unconfirmed events to mine.")
