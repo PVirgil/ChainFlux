@@ -2,12 +2,12 @@
 
 **ChainFlux** is an innovative blockchain implementation designed for storytelling, thought tracking, and causal journaling. Unlike traditional cryptocurrencies or NFT chains, ChainFlux records narrative "events" as blocks, allowing users to build a verifiable, linked history of ideas or stories.
 
-Deployed with **Streamlit**, it provides a user-friendly interface for viewing, adding, and mining narrative blocks — making it ideal for collaborative writing, educational use, or personal knowledge networks.
+Deployed with **Vercel**, it provides a user-friendly interface for viewing, adding, and mining narrative blocks — making it ideal for collaborative writing, educational use, or personal knowledge networks.
 
 ---
 
 ## 🚀 Live Demo (Optional)
-> https://chainflux.streamlit.app 
+> [https://chainflux.streamlit.app](https://chain-flux.vercel.app) 
 
 ---
 
@@ -17,14 +17,14 @@ Deployed with **Streamlit**, it provides a user-friendly interface for viewing, 
 - 🔗 **Linked Inspiration**: Blocks can link to multiple previous blocks, forming non-linear story branches
 - ⛏️ **Proof-of-Work Mining**: Each block must be mined with a valid hash, preserving integrity
 - 💾 **Persistent Chain Storage**: Chain is stored locally in `chainflux.json`
-- 🧠 **Streamlit UI**: Simple web interface for viewing the chain, adding new stories, and mining blocks
+- 🧠 **Vercel UI**: Simple web interface for viewing the chain, adding new stories, and mining blocks
 
 ---
 
 ## 🛠️ Technologies Used
 
 - Python 3.x
-- [Streamlit](https://streamlit.io/)
+- Vercel
 - Built-in JSON for persistence
 - Hashing via `hashlib`
 
@@ -35,8 +35,8 @@ Deployed with **Streamlit**, it provides a user-friendly interface for viewing, 
 ```
 chainflux/
 │
-├── streamlit_chainflux.py     # Main app file (Streamlit UI + blockchain logic)
-├── chainflux.json             # Persistent blockchain data (auto-generated)
+├── chainflux_app.py           # Main app file (Vercel UI + blockchain logic)
+├── vercel.json                # Persistent blockchain data (auto-generated)
 ├── requirements.txt           # Python dependencies
 └── README.md                  # Project description
 ```
@@ -58,7 +58,7 @@ chainflux/
 
 3. Start the app:
    ```bash
-   streamlit run streamlit_chainflux.py
+   streamlit run chainflux_app.py
    ```
 
 ---
