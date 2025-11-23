@@ -16,7 +16,7 @@ Deployed with **Vercel**, it provides a user-friendly interface for viewing, add
 - 📖 **Narrative Blocks**: Each block includes a title, timestamp, narrative body, and references to earlier blocks
 - 🔗 **Linked Inspiration**: Blocks can link to multiple previous blocks, forming non-linear story branches
 - ⛏️ **Proof-of-Work Mining**: Each block must be mined with a valid hash, preserving integrity
-- 💾 **Persistent Chain Storage**: Chain is stored locally in `chainflux.json`
+- 💾 **Persistent Chain Storage**: Chain is stored locally in `vercel.json`
 - 🧠 **Vercel UI**: Simple web interface for viewing the chain, adding new stories, and mining blocks
 
 ---
