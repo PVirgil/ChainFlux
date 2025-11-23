@@ -6,8 +6,8 @@ Deployed with **Vercel**, it provides a user-friendly interface for viewing, add
 
 ---
 
-## 🚀 Live Demo (Optional)
-> [https://chainflux.streamlit.app](https://chain-flux.vercel.app) 
+## 🚀 Live Demo 
+> https://chain-flux.vercel.app
 
 ---
 
