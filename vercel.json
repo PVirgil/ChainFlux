@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "chainflux_app.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "chainflux_app.py" }
+  ]
+}
